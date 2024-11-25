@@ -1,19 +1,21 @@
 import userModel from "../models/userModel.js";
 import validator from "validator";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 import { v2 as cloudinary } from "cloudinary";
 import jwt from "jsonwebtoken";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 //import razorpay from "razorpay";
+
 //api to register user
+
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !password || !email) {
       return res.json({ success: false, message: "Missing Details" });
     }
-    //validating email formart
+    //validating email format
     if (!validator.isEmail(email)) {
       return res.json({ success: false, message: "Enter a valid email" });
     }
@@ -22,8 +24,8 @@ const registerUser = async (req, res) => {
       return res.json({ success: false, message: "Enter a Strong password" });
     }
     //hashing user password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
     const userData = {
       name,
       email,
@@ -48,7 +50,7 @@ const loginUser = async (req, res) => {
     if (!user) {
       return res.json({ success: false, message: "User does not exist" });
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcryptjs.compare(password, user.password);
     if (isMatch) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       res.json({ success: true, token });
@@ -214,12 +216,62 @@ const cancelAppointment = async (req, res) => {
 //   try{
 // const {razorpay_order_id}=req.body 
 // const orderInfo=await razorpayInstance.orders.fetch(razorpay_order_id)
-// console.log(orderInfo)
+// if(orderInfo.status==="paid"){
+// await appointmentModel.findByIdAndUpdate(orderInfo.receipt,{payment:true})
+// res.json({success:true,message:'Payment Successful'})
+//}
+// else{
+//   res.json({success:false,message:"Payment Fail"})
+// }
 //   }
 //   catch(error){
-
+    // console.log(error);
+  //     res.json({ success: false, message: error.message });
 //   }
 // }
+
+
+
+
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); 
+// // API to make payment using Stripe
+// const paymentStripe = async (req, res) => {
+//   try {
+//     const { appointmentId } = req.body;
+//     const appointmentData = await appointmentModel.findById(appointmentId);
+//     if (!appointmentData || appointmentData.cancelled) {
+//       return res.json({
+//         success: false,
+//         message: "Appointment Cancelled or not found",
+//       });
+//     }
+
+//     // Create a payment intent with Stripe
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount: appointmentData.amount * 100, // Amount in cents
+//       currency: 'usd', // Change currency if needed
+//       metadata: { appointmentId },
+//     });
+
+//     res.json({ success: true, clientSecret: paymentIntent.client_secret });
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ success: false, message: error.message });
+//   }
+// };
+
+// // Export the Stripe payment function
+// export {
+//   registerUser,
+//   loginUser,
+//   getProfile,
+//   updateProfile,
+//   bookAppointment,
+//   listAppointment,
+//   cancelAppointment,
+//   paymentStripe, // Add this export
+//   // verifyRazorpay
+// };
 
 export {
   registerUser,
@@ -231,4 +283,4 @@ export {
   cancelAppointment,
   //paymentRazorpay,
   //verifyRazorpay
-};
+}
