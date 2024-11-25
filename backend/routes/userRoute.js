@@ -19,4 +19,3 @@ export default userRouter
 
 
 
-//https://easy.razorpay.com/onboarding/l2/bank-account-details
